@@ -1,7 +1,7 @@
 return {
   {
     "mfussenegger/nvim-dap",
-    dependencies = { "rcarriga/nvim-dap-ui", "jay-babu/mason-nvim-dap.nvim", "nvim-neotest/nvim-nio" },
+    dependencies = { "rcarriga/nvim-dap-ui", "jay-babu/mason-nvim-dap.nvim", "nvim-neotest/nvim-nio", "theHamsta/nvim-dap-virtual-text" },
     keys = {
       -- Debugging
       { "<F10>", desc = "Step Over", function() require("dap").step_over() end },
@@ -11,13 +11,33 @@ return {
       -- { "<leader>du", desc = "Toggle DAP UI", function() require("dapui").toggle() end },
     },
     config = function (_, opts)
-      local dap, dapui, masondap = require("dap"), require("dapui"), require('mason-nvim-dap')
+      local dap, dapui, masondap, virtual_text = require("dap"), require("dapui"), require('mason-nvim-dap'), require("nvim-dap-virtual-text")
+
+      virtual_text.setup()
 
       masondap.setup({
         handlers = {
           function(config)
+            -- config.configurations.typescript = {
+            --   {
+            --     name = 'Launch',
+            --     type = 'pwa-node',
+            --     request = 'launch',
+            --     program = '${file}',
+            --     rootPath = '${workspaceFolder}',
+            --     cwd = '${workspaceFolder}',
+            --     sourceMaps = true,
+            --     skipFiles = { '<node_internals>/**' },
+            --     protocol = 'inspector',
+            --     console = 'integratedTerminal',
+            --   },
+            -- }
             masondap.default_setup(config)
-          end
+          end,
+          typescript = function(config)
+            print(vim.inspect(config))
+            require('mason-nvim-dap').default_setup(config) -- don't forget this!
+          end,
         }
       })
 
@@ -37,27 +57,5 @@ return {
       end
     end
   },
-
-  {
-    "nvim-neotest/neotest",
-    dependencies = {
-      "nvim-neotest/nvim-nio",
-      "nvim-lua/plenary.nvim",
-      "antoinemadec/FixCursorHold.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      {
-        "nvim-neotest/neotest-go",
-        ft = "go"
-      },
-    },
-    config = function()
-      require("neotest").setup({
-        adapters = {
-          require("neotest-go")({})
-        },
-      })
-    end
-  }
-
 }
 
